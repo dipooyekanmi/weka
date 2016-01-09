@@ -32,23 +32,23 @@ import java.io.Serializable;
 public class RemoteExperimentEvent
   implements Serializable {
 
-  /** for serialization */
+  /** For serialization. */
   private static final long serialVersionUID = 7000867987391866451L;
 
-  /** A status type message */
+  /** A status type message. */
   public boolean m_statusMessage;
 
-  /** A log type message */
+  /** A log type message. */
   public boolean m_logMessage;
 
-  /** The message */
+  /** The message. */
   public String m_messageString;
 
-  /** True if a remote experiment has finished */
+  /** True if a remote experiment has finished. */
   public boolean m_experimentFinished;
 
   /**
-   * Constructor
+   * Constructor.
    * @param status true for status type messages
    * @param log true for log type messages
    * @param finished true if experiment has finished
