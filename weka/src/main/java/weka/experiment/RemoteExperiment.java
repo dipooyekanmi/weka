@@ -352,7 +352,6 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Get the base experiment used by this remote experiment.
-   * 
    * @return the base experiment
    */
   public Experiment getBaseExperiment() {
@@ -398,7 +397,6 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Set the lower run number for the experiment.
-   * 
    * @param newRunLower the lower run number for the experiment.
    */
   @Override
@@ -410,7 +408,6 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Set the upper run number for the experiment.
-   * 
    * @param newRunUpper the upper run number for the experiment.
    */
   @Override
@@ -676,8 +673,9 @@ public class RemoteExperiment extends Experiment {
       return;
     }
 
-    if ((getSplitByDataSet() && m_baseExperiment.getDatasets().size() == m_finishedCount)
-      || (!getSplitByDataSet() && (getRunUpper() - getRunLower() + 1) == m_finishedCount)) {
+    boolean splitByDataSet = getSplitByDataSet();
+	if ((splitByDataSet && m_baseExperiment.getDatasets().size() == m_finishedCount)
+      || (!splitByDataSet && (getRunUpper() - getRunLower() + 1) == m_finishedCount)) {
       notifyListeners(false, true, false, "Experiment completed successfully.");
       notifyListeners(false, true, true, postExperimentInfo());
       return;
@@ -687,8 +685,9 @@ public class RemoteExperiment extends Experiment {
       return;
     }
 
-    if (m_experimentAborted
-      && (m_remoteHostsQueue.size() + m_removedHosts) == m_remoteHosts.size()) {
+    int size = m_remoteHostsQueue.size();
+	if (m_experimentAborted
+      && (size + m_removedHosts) == m_remoteHosts.size()) {
       notifyListeners(false, true, true,
         "Experiment aborted. All remote tasks " + "finished.");
     }
@@ -739,11 +738,12 @@ public class RemoteExperiment extends Experiment {
               Thread.sleep(2000);
 
               TaskStatusInfo cs = (TaskStatusInfo) comp.checkStatus(subTaskId);
-              if (cs.getExecutionStatus() == TaskStatusInfo.FINISHED) 
+              String statusMessage = cs.getStatusMessage();
+			if (cs.getExecutionStatus() == TaskStatusInfo.FINISHED) 
               {
                 // push host back onto queue and try launching any waiting
                 // sub-experiments
-                notifyListeners(false, true, false, cs.getStatusMessage());
+                notifyListeners(false, true, false, statusMessage);
                 m_remoteHostsStatus[ah] = AVAILABLE;
                 incrementFinished();
                 availableHost(ah);
@@ -752,11 +752,11 @@ public class RemoteExperiment extends Experiment {
                 // a non connection related error---possibly host doesn't have
                 // access to data sets or security policy is not set up
                 // correctly or classifier(s) failed for some reason
-                notifyListeners(false, true, false, cs.getStatusMessage());
+                notifyListeners(false, true, false, statusMessage);
                 m_remoteHostsStatus[ah] = SOME_OTHER_FAILURE;
                 m_subExpComplete[wexp] = TaskStatusInfo.FAILED;
                 notifyListeners(false, true, false,
-                  subTaskType + " " + cs.getStatusMessage()
+                  subTaskType + " " + statusMessage
                     + ". Scheduling for execution on another host.");
                 incrementFailed(ah);
                 // push experiment back onto queue
@@ -772,11 +772,11 @@ public class RemoteExperiment extends Experiment {
                 finished = true;
               } else if (is == null) {
 			  is = cs;
-			  notifyListeners(false, true, false, cs.getStatusMessage());
+			  notifyListeners(false, true, false, statusMessage);
 			} else {
-			  if (cs.getStatusMessage().compareTo(is.getStatusMessage()) != 0) {
+			  if (statusMessage.compareTo(is.getStatusMessage()) != 0) {
 
-			    notifyListeners(false, true, false, cs.getStatusMessage());
+			    notifyListeners(false, true, false, statusMessage);
 			  }
 			  is = cs;
 			}
@@ -925,7 +925,8 @@ public class RemoteExperiment extends Experiment {
           remoteHosts.add(runHost);
         }
       }
-      if (expFile.length() == 0) {
+      int length = expFile.length();
+	if (length == 0) {
         base = new Experiment();
         try {
           base.setOptions(args);
