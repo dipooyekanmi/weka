@@ -48,7 +48,6 @@ import weka.experiment.xml.XMLExperiment;
  * Holds all the necessary configuration information for a distributed
  * experiment. This object is able to be serialized for storage on disk.
  * <p>
- * 
  * This class is experimental at present. Has been tested using
  * CSVResultListener (sending results to standard out) and
  * DatabaseResultListener (InstantDB + RmiJdbc bridge).
@@ -740,7 +739,8 @@ public class RemoteExperiment extends Experiment {
               Thread.sleep(2000);
 
               TaskStatusInfo cs = (TaskStatusInfo) comp.checkStatus(subTaskId);
-              if (cs.getExecutionStatus() == TaskStatusInfo.FINISHED) {
+              if (cs.getExecutionStatus() == TaskStatusInfo.FINISHED) 
+              {
                 // push host back onto queue and try launching any waiting
                 // sub-experiments
                 notifyListeners(false, true, false, cs.getStatusMessage());
@@ -931,7 +931,7 @@ public class RemoteExperiment extends Experiment {
           base.setOptions(args);
           Utils.checkForRemainingOptions(args);
         } catch (Exception ex) {
-          ex.printStackTrace();
+          ex.printStackTrace(); // NOSONAR
           String result = "Usage:\n\n" + "-l <exp file>\n"
             + "\tLoad experiment from file (default use cli options)\n"
             + "-s <exp file>\n"
@@ -1014,9 +1014,9 @@ public class RemoteExperiment extends Experiment {
         System.err.println("Postprocessing...");
         exp.postProcess();
       }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      System.err.println(ex.getMessage());
+    } catch (Exception ex) { // NOSONAR
+      ex.printStackTrace(); // NOSONAR
+      System.err.println(ex.getMessage()); // NOSONAR
     }
   }
 }
