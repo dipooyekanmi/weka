@@ -225,31 +225,31 @@ import weka.experiment.xml.XMLExperiment;
  */
 public class RemoteExperiment extends Experiment {
 
-  /** for serialization */
+  /** For serialization. */
   static final long serialVersionUID = -7357668825635314937L;
 
-  /** The list of objects listening for remote experiment events */
+  /** The list of objects listening for remote experiment events. */
   private final ArrayList<RemoteExperimentListener> m_listeners = new ArrayList<RemoteExperimentListener>();
 
-  /** Holds the names of machines with remoteEngine servers running */
+  /** Holds the names of machines with remoteEngine servers running. */
   protected DefaultListModel m_remoteHosts = new DefaultListModel();
 
-  /** The queue of available hosts */
+  /** The queue of available hosts. */
   private Queue m_remoteHostsQueue = new Queue();
 
-  /** The status of each of the remote hosts */
+  /** The status of each of the remote hosts. */
   private int[] m_remoteHostsStatus;
 
-  /** The number of times tasks have failed on each remote host */
+  /** The number of times tasks have failed on each remote host. */
   private int[] m_remoteHostFailureCounts;
 
-  /** status of the remote host: available */
+  /** Status of the remote host: available */
   protected static final int AVAILABLE = 0;
-  /** status of the remote host: in use */
+  /** Status of the remote host: in use */
   protected static final int IN_USE = 1;
-  /** status of the remote host: connection failed */
+  /** Status of the remote host: connection failed */
   protected static final int CONNECTION_FAILED = 2;
-  /** status of the remote host: some other failure */
+  /** Status of the remote host: some other failure */
   protected static final int SOME_OTHER_FAILURE = 3;
 
   // protected static final int TO_BE_RUN=0;
@@ -258,38 +258,38 @@ public class RemoteExperiment extends Experiment {
   // protected static final int FINISHED=3;
 
   /**
-   * allow at most 3 failures on a host before it is removed from the list of
-   * usable hosts
+   * Allow at most 3 failures on a host before it is removed from the list of
+   * usable hosts.
    */
   protected static final int MAX_FAILURES = 3;
 
   /**
    * Set to true if MAX_FAILURES exceeded on all hosts or connections fail on
-   * all hosts or user aborts experiment (via gui)
+   * all hosts or user aborts experiment (via gui).
    */
-  private boolean m_experimentAborted = false;
+  private boolean m_experimentAborted;
 
-  /** The number of hosts removed due to exceeding max failures */
+  /** The number of hosts removed due to exceeding max failures. */
   private int m_removedHosts;
 
-  /** The count of failed sub-experiments */
+  /** The count of failed sub-experiments. */
   private int m_failedCount;
 
-  /** The count of successfully completed sub-experiments */
+  /** The count of successfully completed sub-experiments. */
   private int m_finishedCount;
 
   /**
-   * The base experiment to split up into sub experiments for remote execution
+   * The base experiment to split up into sub experiments for remote execution.
    */
-  private Experiment m_baseExperiment = null;
+  private Experiment m_baseExperiment;
 
-  /** The sub experiments */
+  /** The sub experiments. */
   protected Experiment[] m_subExperiments;
 
-  /** The queue of sub experiments waiting to be processed */
+  /** The queue of sub experiments waiting to be processed. */
   private Queue m_subExpQueue = new Queue();
 
-  /** The status of each of the sub-experiments */
+  /** The status of each of the sub-experiments. */
   protected int[] m_subExpComplete;
 
   /**
@@ -323,7 +323,7 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Construct a new RemoteExperiment using an empty Experiment as base
-   * Experiment
+   * Experiment.
    * 
    * @throws Exception if the base experiment is null
    */
@@ -332,7 +332,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Construct a new RemoteExperiment using a base Experiment
+   * Construct a new RemoteExperiment using a base Experiment.
    * 
    * @param base the base experiment to use
    * @throws Exception if the base experiment is null
@@ -343,7 +343,7 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Add an object to the list of those interested in recieving update
-   * information from the RemoteExperiment
+   * information from the RemoteExperiment.
    * 
    * @param r a listener
    */
@@ -352,7 +352,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Get the base experiment used by this remote experiment
+   * Get the base experiment used by this remote experiment.
    * 
    * @return the base experiment
    */
@@ -446,7 +446,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Set the datasets to use in the experiment
+   * Set the datasets to use in the experiment.
    * 
    * @param ds the list of datasets to use
    */
@@ -494,7 +494,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Prepares a remote experiment for running, creates sub experiments
+   * Prepares a remote experiment for running, creates sub experiments.
    * 
    * @throws Exception if an error occurs
    */
@@ -524,7 +524,7 @@ public class RemoteExperiment extends Experiment {
     m_remoteHostsQueue = new Queue();
     // prime the hosts queue
     for (int i = 0; i < m_remoteHosts.size(); i++) {
-      m_remoteHostsQueue.push(new Integer(i));
+      m_remoteHostsQueue.push(Integer.valueOf(i));
     }
 
     // set up sub experiments
@@ -547,7 +547,7 @@ public class RemoteExperiment extends Experiment {
         DefaultListModel temp = new DefaultListModel();
         temp.addElement(m_baseExperiment.getDatasets().get(i));
         m_subExperiments[i].setDatasets(temp);
-        m_subExpQueue.push(new Integer(i));
+        m_subExpQueue.push(Integer.valueOf(i));
       }
     } else {
       for (int i = getRunLower(); i <= getRunUpper(); i++) {
@@ -556,7 +556,7 @@ public class RemoteExperiment extends Experiment {
         m_subExperiments[i - getRunLower()].setRunLower(i);
         m_subExperiments[i - getRunLower()].setRunUpper(i);
 
-        m_subExpQueue.push(new Integer(i - getRunLower()));
+        m_subExpQueue.push(Integer.valueOf(i - getRunLower()));
       }
     }
   }
@@ -573,7 +573,7 @@ public class RemoteExperiment extends Experiment {
     boolean finished, String message) {
     if (m_listeners.size() > 0) {
       for (int i = 0; i < m_listeners.size(); i++) {
-        RemoteExperimentListener r = (m_listeners.get(i));
+        RemoteExperimentListener r = m_listeners.get(i);
         r.remoteExperimentStatus(new RemoteExperimentEvent(status, log,
           finished, message));
       }
@@ -583,14 +583,14 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Set the abort flag
+   * Set the abort flag.
    */
   public void abortExperiment() {
     m_experimentAborted = true;
   }
 
   /**
-   * Increment the number of successfully completed sub experiments
+   * Increment the number of successfully completed sub experiments.
    */
   protected synchronized void incrementFinished() {
     m_finishedCount++;
@@ -598,7 +598,7 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Increment the overall number of failures and the number of failures for a
-   * particular host
+   * particular host.
    * 
    * @param hostNum the index of the host to increment failure count
    */
@@ -608,16 +608,16 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Push an experiment back on the queue of waiting experiments
+   * Push an experiment back on the queue of waiting experiments.
    * 
    * @param expNum the index of the experiment to push onto the queue
    */
   protected synchronized void waitingExperiment(int expNum) {
-    m_subExpQueue.push(new Integer(expNum));
+    m_subExpQueue.push(Integer.valueOf(expNum));
   }
 
   /**
-   * Check to see if we have failed to connect to all hosts
+   * Check to see if we have failed to connect to all hosts.
    * 
    * @return true if failed to connect to all hosts
    */
@@ -644,9 +644,7 @@ public class RemoteExperiment extends Experiment {
    */
   private String postExperimentInfo() {
     StringBuffer text = new StringBuffer();
-    text.append(m_finishedCount + (m_splitByDataSet ? " data sets" : " runs")
-      + " completed successfully. " + m_failedCount
-      + " failures during running.\n");
+    text.append(m_finishedCount).append(m_splitByDataSet ? " data sets" : " runs").append(" completed successfully. ").append(m_failedCount).append(" failures during running.\n");
     System.err.print(text.toString());
     return text.toString();
   }
@@ -661,10 +659,10 @@ public class RemoteExperiment extends Experiment {
   protected synchronized void availableHost(int hostNum) {
     if (hostNum >= 0) {
       if (m_remoteHostFailureCounts[hostNum] < MAX_FAILURES) {
-        m_remoteHostsQueue.push(new Integer(hostNum));
+        m_remoteHostsQueue.push(Integer.valueOf(hostNum));
       } else {
         notifyListeners(false, true, false, "Max failures exceeded for host "
-          + ((String) m_remoteHosts.elementAt(hostNum))
+          + m_remoteHosts.elementAt(hostNum)
           + ". Removed from host list.");
         m_removedHosts++;
       }
@@ -679,8 +677,8 @@ public class RemoteExperiment extends Experiment {
       return;
     }
 
-    if ((getSplitByDataSet() && (m_baseExperiment.getDatasets().size() == m_finishedCount))
-      || (!getSplitByDataSet() && ((getRunUpper() - getRunLower() + 1) == m_finishedCount))) {
+    if ((getSplitByDataSet() && m_baseExperiment.getDatasets().size() == m_finishedCount)
+      || (!getSplitByDataSet() && (getRunUpper() - getRunLower() + 1) == m_finishedCount)) {
       notifyListeners(false, true, false, "Experiment completed successfully.");
       notifyListeners(false, true, true, postExperimentInfo());
       return;
@@ -696,8 +694,7 @@ public class RemoteExperiment extends Experiment {
         "Experiment aborted. All remote tasks " + "finished.");
     }
 
-    if (!m_subExpQueue.empty() && !m_experimentAborted) {
-      if (!m_remoteHostsQueue.empty()) {
+    if (!m_subExpQueue.empty() && !m_experimentAborted && !m_remoteHostsQueue.empty()) {
         int availHost, waitingExp;
         try {
           availHost = ((Integer) m_remoteHostsQueue.pop()).intValue();
@@ -707,11 +704,10 @@ public class RemoteExperiment extends Experiment {
           ex.printStackTrace();
         }
       }
-    }
   }
 
   /**
-   * Launch a sub experiment on a remote host
+   * Launch a sub experiment on a remote host.
    * 
    * @param wexp the index of the sub experiment to launch
    * @param ah the index of the available host to launch on
@@ -726,16 +722,16 @@ public class RemoteExperiment extends Experiment {
         m_subExpComplete[wexp] = TaskStatusInfo.PROCESSING;
         RemoteExperimentSubTask expSubTsk = new RemoteExperimentSubTask();
         expSubTsk.setExperiment(m_subExperiments[wexp]);
-        String subTaskType = (getSplitByDataSet()) ? "dataset :"
+        String subTaskType = getSplitByDataSet() ? "dataset :"
           + ((File) m_subExperiments[wexp].getDatasets().elementAt(0))
             .getName() : "run :" + m_subExperiments[wexp].getRunLower();
         try {
-          String name = "//" + ((String) m_remoteHosts.elementAt(ah))
+          String name = "//" + m_remoteHosts.elementAt(ah)
             + "/RemoteEngine";
           Compute comp = (Compute) Naming.lookup(name);
           // assess the status of the sub-exp
           notifyListeners(false, true, false, "Starting " + subTaskType
-            + " on host " + ((String) m_remoteHosts.elementAt(ah)));
+            + " on host " + m_remoteHosts.elementAt(ah));
           Object subTaskId = comp.executeTask(expSubTsk);
           boolean finished = false;
           TaskStatusInfo is = null;
@@ -774,18 +770,16 @@ public class RemoteExperiment extends Experiment {
                 // however.
                 availableHost(ah);
                 finished = true;
-              } else {
-                if (is == null) {
-                  is = cs;
-                  notifyListeners(false, true, false, cs.getStatusMessage());
-                } else {
-                  if (cs.getStatusMessage().compareTo(is.getStatusMessage()) != 0) {
+              } else if (is == null) {
+			  is = cs;
+			  notifyListeners(false, true, false, cs.getStatusMessage());
+			} else {
+			  if (cs.getStatusMessage().compareTo(is.getStatusMessage()) != 0) {
 
-                    notifyListeners(false, true, false, cs.getStatusMessage());
-                  }
-                  is = cs;
-                }
-              }
+			    notifyListeners(false, true, false, cs.getStatusMessage());
+			  }
+			  is = cs;
+			}
             } catch (InterruptedException ie) {
             }
           }
@@ -796,7 +790,7 @@ public class RemoteExperiment extends Experiment {
           System.err.println(ce);
           ce.printStackTrace();
           notifyListeners(false, true, false, "Connection to "
-            + ((String) m_remoteHosts.elementAt(ah)) + " failed. Scheduling "
+            + m_remoteHosts.elementAt(ah) + " failed. Scheduling "
             + subTaskType + " for execution on another host.");
           checkForAllFailedHosts();
           waitingExperiment(wexp);
@@ -812,7 +806,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Overides the one in Experiment
+   * Overides the one in Experiment.
    * 
    * @throws Exception never throws an exception
    */
@@ -822,7 +816,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * overides the one in Experiment
+   * Overides the one in Experiment.
    */
   @Override
   public void advanceCounters() {
@@ -830,7 +824,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * overides the one in Experiment
+   * Overides the one in Experiment.
    */
   @Override
   public void postProcess() {
@@ -838,7 +832,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Add a host name to the list of remote hosts
+   * Add a host name to the list of remote hosts.
    * 
    * @param hostname the host name to add to the list
    */
@@ -847,7 +841,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Get the list of remote host names
+   * Get the list of remote host names.
    * 
    * @return the list of remote host names
    */
@@ -856,7 +850,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Set the list of remote host names
+   * Set the list of remote host names.
    * 
    * @param list the list of remote host names
    */
@@ -865,7 +859,7 @@ public class RemoteExperiment extends Experiment {
   }
 
   /**
-   * Overides toString in Experiment
+   * Overides toString in Experiment.
    * 
    * @return a description of this remote experiment
    */
@@ -875,13 +869,13 @@ public class RemoteExperiment extends Experiment {
 
     result += "\nRemote Hosts:\n";
     for (int i = 0; i < m_remoteHosts.size(); i++) {
-      result += ((String) m_remoteHosts.elementAt(i)) + '\n';
+      result += (String) m_remoteHosts.elementAt(i) + '\n';
     }
     return result;
   }
 
   /**
-   * Overides runExperiment in Experiment
+   * Overides runExperiment in Experiment.
    */
   @Override
   public void runExperiment() {
@@ -915,7 +909,7 @@ public class RemoteExperiment extends Experiment {
 
       // get options from XML?
       String xmlOption = Utils.getOption("xml", args);
-      if (!xmlOption.equals("")) {
+      if (!"".equals(xmlOption)) {
         args = new XMLOptions(xmlOption).toArray();
       }
 
@@ -960,8 +954,8 @@ public class RemoteExperiment extends Experiment {
         Object tmp;
 
         // KOML?
-        if ((KOML.isPresent())
-          && (expFile.toLowerCase().endsWith(KOML.FILE_EXTENSION))) {
+        if (KOML.isPresent()
+          && expFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) {
           tmp = KOML.read(expFile);
         } else
         // XML?
@@ -989,12 +983,12 @@ public class RemoteExperiment extends Experiment {
       for (int i = 0; i < remoteHosts.size(); i++) {
         exp.addRemoteHost(remoteHosts.get(i));
       }
-      System.err.println("Experiment:\n" + exp.toString());
+      System.err.println("Experiment:\n" + exp);
 
       if (saveFile.length() != 0) {
         // KOML?
-        if ((KOML.isPresent())
-          && (saveFile.toLowerCase().endsWith(KOML.FILE_EXTENSION))) {
+        if (KOML.isPresent()
+          && saveFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) {
           KOML.write(saveFile, exp);
         } else
         // XML?
